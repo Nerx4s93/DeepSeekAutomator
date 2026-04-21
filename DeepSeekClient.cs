@@ -12,7 +12,7 @@ namespace DeepSeekAutomator
         private readonly IWebDriver _driver;
         private readonly WebDriverWait _wait;
 
-        public DeepSeekClient(string profile, bool headless = false)
+        public DeepSeekClient(string profile, bool headless = true)
         {
             _driver = BrowserFactory.CreateBrowser(profile, headless: headless);
             _wait = new WebDriverWait(_driver, TimeSpan.FromSeconds(10));
