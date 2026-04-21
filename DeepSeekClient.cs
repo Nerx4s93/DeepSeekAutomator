@@ -12,7 +12,7 @@ namespace DeepSeekAutomator
         private readonly IWebDriver _driver;
         private readonly WebDriverWait _wait;
 
-        public DeepSeekClient(string profile, bool headless = true)
+        public DeepSeekClient(string profile, bool headless = false)
         {
             _driver = BrowserFactory.CreateBrowser(profile, headless: headless);
             _wait = new WebDriverWait(_driver, TimeSpan.FromSeconds(10));
@@ -71,17 +71,13 @@ namespace DeepSeekAutomator
                 var textarea = _driver.FindElement(By.CssSelector(
                     "textarea[name='search'], textarea[placeholder*='Message'], textarea[placeholder*='Сообщение']"));
 
-                textarea.Clear();
+                var js = (IJavaScriptExecutor)_driver;
+                js.ExecuteScript("arguments[0].value = '';", textarea);
 
-                var lines = message.Split('\n');
-                for (int i = 0; i < lines.Length; i++)
-                {
-                    textarea.SendKeys(lines[i]);
-                    if (i < lines.Length - 1)
-                    {
-                        textarea.SendKeys(Keys.Shift + Keys.Enter);
-                    }
-                }
+                js.ExecuteScript("arguments[0].value = arguments[1];", textarea, message);
+
+                js.ExecuteScript("arguments[0].dispatchEvent(new Event('input', { bubbles: true }));", textarea);
+
                 textarea.SendKeys(Keys.Enter);
             }
             catch (Exception ex)
