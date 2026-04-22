@@ -1,9 +1,10 @@
-﻿using System;
-using System.Diagnostics;
-using System.Runtime.InteropServices;
-using OpenQA.Selenium;
+﻿using OpenQA.Selenium;
 using OpenQA.Selenium.Support.UI;
 using SeleniumExtras.WaitHelpers;
+using System;
+using System.Diagnostics;
+using System.Runtime.InteropServices;
+using System.Threading.Tasks;
 
 namespace DeepSeekAutomator
 {
@@ -12,17 +13,26 @@ namespace DeepSeekAutomator
         private readonly IWebDriver _driver;
         private readonly WebDriverWait _wait;
 
-        public DeepSeekClient(string profile, bool headless = true)
+        private DeepSeekClient(IWebDriver driver, WebDriverWait wait)
         {
-            _driver = BrowserFactory.CreateBrowser(profile, headless: headless);
-            _wait = new WebDriverWait(_driver, TimeSpan.FromSeconds(10));
-
-            _driver.Navigate().GoToUrl("https://chat.deepseek.com/");
-
-            _wait.Until(ExpectedConditions.ElementIsVisible(By.CssSelector(
-                "textarea[placeholder*='Message'], textarea[placeholder*='Сообщение']")));
+            _driver = driver;
+            _wait = wait;
         }
 
+        public static async Task<DeepSeekClient> CreateAsync(string profile, bool headless = true)
+        {
+            var driver = await BrowserFactory.CreateBrowserAsync(profile, headless: headless);
+            var wait = new WebDriverWait(driver, TimeSpan.FromSeconds(10));
+
+            await Task.Run(() =>
+            {
+                driver.Navigate().GoToUrl("https://chat.deepseek.com/");
+                wait.Until(ExpectedConditions.ElementIsVisible(By.CssSelector(
+                    "textarea[placeholder*='Message'], textarea[placeholder*='Сообщение']")));
+            });
+
+            return new DeepSeekClient(driver, wait);
+        }
         public void EnableNormalMode() => ClickModelType("default", "Обычный режим");
 
         public void EnableExpertMode() => ClickModelType("expert", "Режим Эксперт");
@@ -32,9 +42,8 @@ namespace DeepSeekAutomator
             try
             {
                 _driver.FindElement(By.XPath($"//div[@data-model-type='{type}']")).Click();
-                Console.WriteLine($"✅ {label} включен\n");
             }
-            catch { Console.WriteLine($"❌ {label} не найден\n"); }
+            catch { Console.WriteLine($"[Deepseek][Error] {label} не найден\n"); }
         }
 
         public void EnableDeepThinking() => SetToggleButton("Глубокое мышление", "DeepThink", true);
@@ -54,14 +63,9 @@ namespace DeepSeekAutomator
                 if (enable && !isSelected || !enable && isSelected)
                 {
                     button.Click();
-                    Console.WriteLine($"✅ {ruText} {(enable ? "включено" : "отключено")}\n");
-                }
-                else
-                {
-                    Console.WriteLine($"ℹ️ {ruText} уже {(enable ? "включено" : "отключено")}\n");
                 }
             }
-            catch { Console.WriteLine($"❌ Кнопка '{ruText}' не найдена\n"); }
+            catch { Console.WriteLine($"[Deepseek][Error] Кнопка '{ruText}' не найдена\n"); }
         }
 
         public void SendMessage(string message)
@@ -82,7 +86,7 @@ namespace DeepSeekAutomator
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"❌ Ошибка при отправке: {ex.Message}\n");
+                Console.WriteLine($"[Deepseek][Error] Ошибка при отправке: {ex.Message}\n");
             }
         }
 
@@ -92,9 +96,11 @@ namespace DeepSeekAutomator
             {
                 var button = _driver.FindElement(By.XPath("//span[text()='Новый чат' or text()='New chat']"));
                 button.Click();
-                Console.WriteLine("✅ Новый чат создан\n");
             }
-            catch (Exception e) { Console.WriteLine($"❌ Ошибка: {e.Message}\n"); }
+            catch (Exception e)
+            {
+                Console.WriteLine($"[Deepseek][Error] Ошибка: {e.Message}\n");
+            }
         }
 
         public void DisposeWithoutSaving()
