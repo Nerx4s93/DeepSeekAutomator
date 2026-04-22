@@ -5,6 +5,7 @@ using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using OpenQA.Selenium;
 using OpenQA.Selenium.Chrome;
+using OpenQA.Selenium.DevTools;
 
 namespace DeepSeekAutomator
 {
@@ -13,7 +14,8 @@ namespace DeepSeekAutomator
         public static async Task<IWebDriver> CreateBrowserAsync(
             string profileName = "deepseek1",
             string windowSize = "1280,720",
-            bool headless = false)
+            bool headless = false,
+            ProxyInfo? proxy = null)
         {
             return await Task.Run(async () =>
             {
@@ -25,6 +27,11 @@ namespace DeepSeekAutomator
                 }
 
                 var options = new ChromeOptions();
+
+                if (proxy != null)
+                {
+                    options.AddArgument($"--proxy-server={proxy.Host}:{proxy.Port}");
+                }
 
                 if (headless)
                 {
@@ -95,6 +102,21 @@ namespace DeepSeekAutomator
                 service.HideCommandPromptWindow = true;
 
                 var driver = new ChromeDriver(service, options);
+
+                if (proxy is { HasCredentials: true })
+                {
+                    var devTools = driver as IDevTools;
+                    var session = devTools.GetDevToolsSession();
+
+                    var auth = Convert.ToBase64String(System.Text.Encoding.UTF8.GetBytes($"{proxy.Username}:{proxy.Password}"));
+                    var headers = new Dictionary<string, object>
+                    {
+                        { "Proxy-Authorization", $"Basic {auth}" }
+                    };
+
+                    driver.ExecuteCdpCommand("Network.enable", []);
+                    driver.ExecuteCdpCommand("Network.setExtraHTTPHeaders", new Dictionary<string, object?> { { "headers", headers } });
+                }
 
                 driver.Manage().Timeouts().PageLoad = TimeSpan.FromSeconds(30);
                 driver.Manage().Timeouts().AsynchronousJavaScript = TimeSpan.FromSeconds(30);
