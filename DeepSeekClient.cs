@@ -142,11 +142,9 @@ namespace DeepSeekAutomator
             {
                 try
                 {
-                    var sendButton = _driver.FindElement(By.CssSelector("div[class*='ds-icon-button']"));
+                    var sendButton = _driver.FindElement(By.CssSelector("div._52c986b.ds-icon-button"));
                     var svgPath = sendButton.FindElement(By.CssSelector("svg path"));
-                    var d = svgPath.GetAttribute("d") ?? "";
-
-                    return !d.Contains("M8.3125 0.981587");
+                    return !svgPath.GetAttribute("d")!.Contains("M8.3125 0.981587");
                 }
                 catch { return false; }
             });
