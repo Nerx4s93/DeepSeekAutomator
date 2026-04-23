@@ -16,7 +16,7 @@ namespace DeepSeekAutomator
         {
             return await Task.Run(async () =>
             {
-                var profileDir = Path.Combine(AppContext.BaseDirectory, "profiles", profileName);
+                var profileDir = Path.Combine(AppContext.BaseDirectory, profileName);
 
                 if (!Directory.Exists(profileDir))
                 {
@@ -39,7 +39,7 @@ namespace DeepSeekAutomator
         {
             return await Task.Run(async () =>
             {
-                var profileDir = Path.Combine(AppContext.BaseDirectory, "profiles", profileName);
+                var profileDir = Path.Combine(AppContext.BaseDirectory, profileName);
 
                 if (!Directory.Exists(profileDir))
                 {
