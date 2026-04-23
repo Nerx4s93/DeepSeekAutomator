@@ -21,7 +21,7 @@ namespace DeepSeekAutomator
 
         public static async Task<DeepSeekClient> CreateAsync(string profile, bool headless = true)
         {
-            var driver = await BrowserFactory.CreateBrowserAsync(profile, headless: headless);
+            var driver = await BrowserFactory.CreateOptimizedBrowserAsync(profile, headless: headless);
             var wait = new WebDriverWait(driver, TimeSpan.FromSeconds(10));
 
             await Task.Run(() =>

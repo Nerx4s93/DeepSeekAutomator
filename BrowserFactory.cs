@@ -10,7 +10,18 @@ namespace DeepSeekAutomator
 {
     public static class BrowserFactory
     {
-        public static async Task<IWebDriver> CreateBrowserAsync(
+        public static async Task<IWebDriver> OpenBrowserAsync(
+            string profileName,
+            string windowSize = "1280,720")
+        {
+            return await Task.Run(async () =>
+            {
+                var driver = new ChromeDriver();
+                return driver;
+            });
+        }
+
+        public static async Task<IWebDriver> CreateOptimizedBrowserAsync(
             string profileName = "deepseek1",
             string windowSize = "1280,720",
             bool headless = false)
