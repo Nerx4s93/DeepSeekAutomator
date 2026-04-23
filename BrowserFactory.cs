@@ -16,7 +16,18 @@ namespace DeepSeekAutomator
         {
             return await Task.Run(async () =>
             {
-                var driver = new ChromeDriver();
+                var profileDir = Path.Combine(AppContext.BaseDirectory, "profiles", profileName);
+
+                if (!Directory.Exists(profileDir))
+                {
+                    Directory.CreateDirectory(profileDir);
+                }
+
+                var options = new ChromeOptions();
+                options.AddArgument($"--user-data-dir={profileDir}");
+                options.AddArgument($"--window-size={windowSize}");
+
+                var driver = new ChromeDriver(options);
                 return driver;
             });
         }
