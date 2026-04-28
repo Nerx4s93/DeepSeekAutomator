@@ -67,7 +67,7 @@ namespace DeepSeekAutomator
                 {
                     var xpath = $"//div[contains(@class, 'ds-atom-button')][contains(., '{ruText}') or contains(., '{enText}')]";
                     var button = _driver.FindElement(By.XPath(xpath));
-                    bool isSelected = button.GetAttribute("class")!.Contains("ds-toggle-button--selected");
+                    var isSelected = button.GetAttribute("class")!.Contains("ds-toggle-button--selected");
 
                     if (enable && !isSelected || !enable && isSelected)
                     {
@@ -83,7 +83,7 @@ namespace DeepSeekAutomator
 
         public async Task SendMessageAsync(string message)
         {
-            await Task.Run(() =>
+            await Task.Run(async () =>
             {
                 try
                 {
@@ -92,8 +92,11 @@ namespace DeepSeekAutomator
 
                     var js = (IJavaScriptExecutor)_driver;
                     js.ExecuteScript("arguments[0].value = '';", textarea);
+                    await Task.Delay(200);
                     js.ExecuteScript("arguments[0].value = arguments[1];", textarea, message);
+                    await Task.Delay(200);
                     js.ExecuteScript("arguments[0].dispatchEvent(new Event('input', { bubbles: true }));", textarea);
+                    await Task.Delay(200);
 
                     textarea.SendKeys(Keys.Enter);
                 }
