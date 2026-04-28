@@ -12,7 +12,7 @@ namespace DeepSeekAutomator
     {
         public static async Task<IWebDriver> OpenBrowserAsync(
             string profileName,
-            string windowSize = "1280,720")
+            string windowSize = "720,500")
         {
             return await Task.Run(async () =>
             {
@@ -34,7 +34,7 @@ namespace DeepSeekAutomator
 
         public static async Task<IWebDriver> CreateOptimizedBrowserAsync(
             string profileName = "deepseek1",
-            string windowSize = "1280,720",
+            string windowSize = "720,500",
             bool headless = false)
         {
             return await Task.Run(async () =>
